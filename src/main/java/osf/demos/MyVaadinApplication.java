@@ -1,47 +1,110 @@
-/*
- * Copyright 2009 IT Mill Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package osf.demos;
 
+import com.vaadin.addon.jpacontainer.JPAContainer;
+import com.vaadin.addon.jpacontainer.JPAContainerFactory;
 import com.vaadin.Application;
-import com.vaadin.ui.Button;
+import com.vaadin.data.Property;
+import com.vaadin.data.Property.ValueChangeEvent;
+import com.vaadin.data.util.BeanItem;
+import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.ui.Button.ClickEvent;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Window;
+import com.vaadin.ui.*;
+import osf.demos.MovieEditor.EditorSavedEvent;
+import osf.demos.MovieEditor.EditorSavedListener;
+import osf.demos.model.Movie;
 
-/**
- * The Application's "main" class
- */
-@SuppressWarnings("serial")
-public class MyVaadinApplication extends Application
-{
-    private Window window;
+public class MyVaadinApplication extends Application {
+    private static String[] visibleCols = new String[] { "lastName", "firstName", "company" };
+
+    private Table contactList = new Table();
+    private Form contactEditor = new Form();
+    private HorizontalLayout bottomLeftCorner = new HorizontalLayout();
+    private Button contactRemovalButton;
+    
+    JPAContainer<Movie> container = JPAContainerFactory.make(Movie.class, "VaadinPersistenceUnit");
 
     @Override
-    public void init()
-    {
-        window = new Window("My Vaadin Application");
-        setMainWindow(window);
-        Button button = new Button("Click Me");
-        button.addListener(new Button.ClickListener() {
-            public void buttonClick(ClickEvent event) {
-                window.addComponent(new Label("Thank you for clicking"));
-            }
-        });
-        window.addComponent(button);
-        
+    public void init() {
+        initLayout();
+        initContactAddRemoveButtons();
+        initAddressList();
+        initFilteringControls();
     }
-    
+
+    private void initLayout() {
+        VerticalLayout left = new VerticalLayout();
+        setMainWindow(new Window("Address Book", left));
+        
+        left.setSizeFull();
+        left.addComponent(contactList);
+        contactList.setSizeFull();
+        contactList.setColumnReorderingAllowed(true);
+        left.setExpandRatio(contactList, 1);
+        left.addComponent(bottomLeftCorner);
+    }
+
+    private void initContactAddRemoveButtons() {
+        bottomLeftCorner.addComponent(new Button("new",
+                new Button.ClickListener() {
+                    @Override
+                    public void buttonClick(ClickEvent event) {
+                        final BeanItem<Movie> newPersonItem = new BeanItem<Movie>(new Movie());
+                        MovieEditor personEditor = new MovieEditor(newPersonItem);
+                        personEditor.addListener(new EditorSavedListener() {
+                            @Override
+                            public void editorSaved(EditorSavedEvent event) {
+                                container.addEntity(newPersonItem.getBean());
+                            }
+                        });
+                        getMainWindow().addWindow(personEditor);
+                    }
+                }));
+        
+        bottomLeftCorner.addComponent(new Button("edit",
+                new Button.ClickListener() {
+                    @Override
+                    public void buttonClick(ClickEvent event) {
+                        final MovieEditor personEditor = new MovieEditor(contactList.getItem(contactList.getValue()));
+                        getMainWindow().addWindow(personEditor);
+                    }
+                }));
+        
+        contactRemovalButton = new Button("delete", new Button.ClickListener() {
+            @Override
+            public void buttonClick(ClickEvent event) {
+                container.removeItem(contactList.getValue());
+            }
+        });        
+        bottomLeftCorner.addComponent(contactRemovalButton);
+    }
+
+    private void initAddressList() {        
+        contactList.setContainerDataSource(container);
+        contactList.setVisibleColumns(visibleCols);
+        contactList.setSelectable(true);
+        contactList.setImmediate(true);
+    }
+
+    private void initFilteringControls() {
+        for (final String pn : visibleCols) {
+            final TextField sf = new TextField();
+            bottomLeftCorner.addComponent(sf);
+            sf.setWidth("100%");
+            sf.setInputPrompt(pn);
+            sf.setImmediate(true);
+            bottomLeftCorner.setExpandRatio(sf, 1);
+            sf.addListener(new Property.ValueChangeListener() {
+                @Override
+                public void valueChange(ValueChangeEvent event) {
+                    container.removeContainerFilters(pn);
+                    
+                    if (sf.toString().length() > 0 && !pn.equals(sf.toString())) {
+                        container.addContainerFilter(pn, sf.toString(), true, false);
+                    }
+                    
+                    getMainWindow().showNotification("" + container.size() + " matches found");
+                }
+            });
+        }
+    }
 }

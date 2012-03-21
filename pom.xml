@@ -13,6 +13,7 @@
     <vaadin.version>6.7.1</vaadin.version>
     <gwt.version>2.3.0</gwt.version>
     <gwt.plugin.version>2.2.0</gwt.plugin.version>
+    <netbeans.hint.deploy.server>gfv3ee6</netbeans.hint.deploy.server>
   </properties>
 
   <build>
@@ -21,8 +22,8 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>1.6</source>
+          <target>1.6</target>
         </configuration>
       </plugin>
       
@@ -141,6 +142,12 @@
       <id>vaadin-addons</id>
       <url>http://maven.vaadin.com/vaadin-addons</url>
     </repository>
+    <repository>
+      <url>http://download.eclipse.org/rt/eclipselink/maven.repo/</url>
+      <id>eclipselink</id>
+      <layout>default</layout>
+      <name>Repository for library Library[eclipselink]</name>
+    </repository>
   </repositories>
 
   <!--
@@ -169,19 +176,38 @@
   -->
 
   <dependencies>
+      
     <dependency>
       <groupId>com.vaadin</groupId>
       <artifactId>vaadin</artifactId>
       <version>${vaadin.version}</version>
     </dependency>
-    <!--
+    
+    <dependency>
+      <groupId>com.vaadin.addon</groupId>
+      <artifactId>jpacontainer-addon-agpl-3.0</artifactId>
+      <version>2.1.0</version>
+    </dependency>
+    
+    <dependency>
+            <groupId>org.vaadin.addons</groupId>
+            <artifactId>customfield</artifactId>
+            <version>0.9.3</version>
+    </dependency>
+    <dependency>
+            <groupId>com.vaadin.addon</groupId>
+            <artifactId>beanvalidation-addon</artifactId>
+            <version>1.0.0</version>
+    </dependency>
+        
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-user</artifactId>
       <version>${gwt.version}</version>
       <scope>provided</scope>
     </dependency>
-    <dependency>
+    
+   <!--<dependency>
       <groupId>javax.validation</groupId>
       <artifactId>validation-api</artifactId>
       <version>1.0.0.GA</version>
@@ -195,6 +221,24 @@
       <scope>provided</scope>
 	</dependency>
     -->
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>eclipselink</artifactId>
+      <version>2.3.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>javax.persistence</artifactId>
+      <version>2.0.3</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.persistence</groupId>
+      <artifactId>org.eclipse.persistence.jpa.modelgen.processor</artifactId>
+      <version>2.3.0</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
 </project>
