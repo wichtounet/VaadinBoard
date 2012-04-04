@@ -1,12 +1,11 @@
 package osf.demos;
 
+import com.vaadin.Application;
 import com.vaadin.addon.jpacontainer.JPAContainer;
 import com.vaadin.addon.jpacontainer.JPAContainerFactory;
-import com.vaadin.Application;
 import com.vaadin.data.Property;
 import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.util.BeanItem;
-import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.*;
 import osf.demos.MovieEditor.EditorSavedEvent;
@@ -64,15 +63,19 @@ public class MyVaadinApplication extends Application {
                 new Button.ClickListener() {
                     @Override
                     public void buttonClick(ClickEvent event) {
-                        final MovieEditor personEditor = new MovieEditor(contactList.getItem(contactList.getValue()));
-                        getMainWindow().addWindow(personEditor);
+                        if(contactList.getValue() != null){
+                            final MovieEditor personEditor = new MovieEditor(contactList.getItem(contactList.getValue()));
+                            getMainWindow().addWindow(personEditor);
+                        }
                     }
                 }));
         
         contactRemovalButton = new Button("delete", new Button.ClickListener() {
             @Override
             public void buttonClick(ClickEvent event) {
-                container.removeItem(contactList.getValue());
+                if(contactList.getValue() != null){
+                    container.removeItem(contactList.getValue());
+                }
             }
         });        
         bottomLeftCorner.addComponent(contactRemovalButton);
